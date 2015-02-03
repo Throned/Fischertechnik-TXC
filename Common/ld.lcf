@@ -1,0 +1,171 @@
+PLC_APP_SIZE        = 0x000D0000;
+PLC_APP_PA_START    = 0x20700000;
+PLC_APP_VA_START    = 0x30700000;
+
+PLC_APP_PA_END	    = PLC_APP_PA_START + PLC_APP_SIZE;
+PLC_APP_VA_END	    = PLC_APP_VA_START + PLC_APP_SIZE;
+
+
+MEMORY
+{
+    plc_app_area_pa (RXA) : ORIGIN = 0x20700000, LENGTH = 832K
+    plc_app_area_va (RXA) : ORIGIN = 0x30700000, LENGTH = 832K
+}
+
+
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
+
+
+OUTPUT_ARCH(arm)
+
+
+PHDRS
+{
+    code     PT_LOAD ;      /* segment containing all sections to load in program memory */
+    debug    PT_LOAD ;      /* segment containing all sections for gdb debug             */
+}
+
+
+SECTIONS
+{
+    /* ******************** code ******************** */
+    /* Code RO */
+
+    . = ALIGN(4);
+
+    .code :
+    {
+        _code_start = .;
+
+            *(.intro)
+            *(.code)
+            *(.text*)
+            *(.glue_7t)
+            *(.glue_7)
+            *(.vfp11_veneer)
+            *(.v4_bx)
+
+            . = ALIGN(4);
+
+        _code_end = .;
+
+    } >plc_app_area_va AT>plc_app_area_pa :code
+
+
+    /* ******************** const data ******************** */
+    /* Data RO */
+
+    . = ALIGN(4);
+
+    .data_const :
+    {
+        _rodata_start = .;
+
+            *(.rodata*)				/* C-compiler output .read only data */
+            *(.eh_frame)
+
+            . = ALIGN(4);
+
+        _rodata_end = .;
+
+    } >plc_app_area_va AT>plc_app_area_pa :code
+
+
+    /* ******************** initialized data ******************** */
+    /* Data RW */
+
+    . = ALIGN(4);
+
+    .data_initialized :
+    { 
+        _data_initialized_start = .;
+
+        *(.data)				    /* C-compiler output .data */
+
+        _data_initialized_end = .;
+
+        . = ALIGN(4);
+
+    } >plc_app_area_va AT>plc_app_area_pa :code
+
+
+    /* ******************** zero data ******************** */
+    /* Data RW */
+
+    . = ALIGN(4);
+
+    .data_zero :
+    { 
+        . = ALIGN(4);
+
+        _data_zero_start = .;
+
+        *(.data_zero)
+        *(COMMON)
+        *(.dynbss)                  /* bss "Block Started by Symbol" */
+        *(.bss .bss.* .gnu.linkonce.b.*)
+
+        _data_zero_end = .;
+
+        /* Align here to ensure that the .bss section occupies space up to
+          _end.  Align after .bss to ensure correct alignment even if the
+          .bss section disappears because there are no input sections.  */
+        . = ALIGN(4);
+
+    } >plc_app_area_va :NONE
+
+    . = ALIGN(4);
+
+
+    /* ******************** .comment ******************** */
+
+    /DISCARD/ :
+    {
+        *(.comment)
+        
+    } :NONE
+
+
+    /* ******************** gdb debug ******************** */
+
+    /* Stabs debugging sections. */ 
+    .stab 0 : { *(.stab) } :debug
+    .stabstr 0 : { *(.stabstr) } :debug
+    .stab.excl 0 : { *(.stab.excl) } :debug
+    .stab.exclstr 0 : { *(.stab.exclstr) } :debug
+    .stab.index 0 : { *(.stab.index) } :debug
+    .stab.indexstr 0 : { *(.stab.indexstr) } :debug
+    .comment 0 : { *(.comment) } :debug
+
+    /* DWARF debug sections. 
+    Symbols in the DWARF debugging sections are relative to the beginning 
+    of the section so we begin them at 0. */
+
+    /* DWARF 1 */ 
+    .debug 0 : { *(.debug) } :debug
+    .line 0 : { *(.line) } :debug
+
+    /* GNU DWARF 1 extensions */ 
+    .debug_srcinfo 0 : { *(.debug_srcinfo) } :debug
+    .debug_sfnames 0 : { *(.debug_sfnames) } :debug
+
+    /* DWARF 1.1 and DWARF 2 */ 
+    .debug_aranges 0 : { *(.debug_aranges) } :debug
+    .debug_pubnames 0 : { *(.debug_pubnames) } :debug
+
+    /* DWARF 2 */ 
+    .debug_info 0 : { *(.debug_info .gnu.linkonce.wi.*) } :debug
+    .debug_abbrev 0 : { *(.debug_abbrev) } :debug
+    .debug_line 0 : { *(.debug_line) } :debug
+    .debug_frame 0 : { *(.debug_frame) } :debug
+    .debug_str 0 : { *(.debug_str) } :debug
+    .debug_loc 0 : { *(.debug_loc) } :debug
+    .debug_macinfo 0 : { *(.debug_macinfo) } :debug
+
+    /* SGI/MIPS DWARF 2 extensions */ 
+    .debug_weaknames 0 : { *(.debug_weaknames) } :debug
+    .debug_funcnames 0 : { *(.debug_funcnames) } :debug
+    .debug_typenames 0 : { *(.debug_typenames) } :debug
+    .debug_varnames 0 : { *(.debug_varnames) } :debug
+}
+

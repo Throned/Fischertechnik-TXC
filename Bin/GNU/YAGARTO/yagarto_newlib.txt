@@ -1,0 +1,37 @@
+
+!!! This version of YAGARTO was built to support newlib with reentrant stubs !!!
+
+Therefore it is possible that you will get some undefined references from the
+linker in case you use the printf function for example.
+
+The undefined references could be:
+
+  _sbrk_r, _fstat_r, _isatty_r, _close_r, _lseek_r, _write_r, _read_r
+    
+To use functions from stdio (like printf) in own projects, the interface functions
+for the newlib have to be provided. For more information take a look in chapter 13
+from the "Red Hat newlib C Library" documentation.
+(ftp://sources.redhat.com/pub/newlib/index.html)
+
+You can find a good source about "Porting and Using Newlib in Embedded Systems"
+on the page from Bill Gatliff (http://neptune.billgatliff.com/newlib.html).
+
+The YAGARTO version of newlib was built with the following options:
+
+ -DREENTRANT_SYSCALLS_PROVIDED
+ --disable-newlib-supplied-syscalls
+
+To make your life easier, an example "syscalls.c" can be find here:
+
+http://www.yagarto.de/download/yagarto/syscalls.c
+
+(29.03.2009, mifi)
+
+
+
+
+
+
+
+
+

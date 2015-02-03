@@ -1,0 +1,12 @@
+
+This build of yagarto use the following versions:
+
+binutils: 2.19.1
+gcc:      4.4.1
+newlib:   1.17.0
+gdb:      6.8.50-20080308-cvs
+
+And was built to support newlib with reentrant stubs.
+For more information take a look in the yagarto_newlib.txt
+
+(17.08.2009, mifi)
